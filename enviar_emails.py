@@ -1,0 +1,29 @@
+import os
+from email.message import EmailMessage
+import smtplib
+import pandas as pd
+
+def enviar_email_com_df(para: str, assunto: str, corpo: str, df: pd.DataFrame, remetente: str, senha: str, nome_original: str):
+    msg = EmailMessage()
+    msg['From'] = remetente
+    msg['To'] = para
+    msg['Subject'] = assunto
+    msg.set_content(corpo)
+
+    temp_file = "temp_envio.xlsx"
+    df.to_excel(temp_file, index=False)
+
+    with open(temp_file, 'rb') as f:
+        msg.add_attachment(
+            f.read(),
+            maintype='application',
+            subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            filename=nome_original
+        )
+
+    with smtplib.SMTP_SSL('email-ssl.com.br', 465) as smtp:
+        smtp.login(remetente, senha)
+        smtp.send_message(msg)
+        print(f"E-mail enviado para {para} com o anexo '{nome_original}'.")
+
+    os.remove(temp_file)
