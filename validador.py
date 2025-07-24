@@ -47,7 +47,7 @@ def validador_horario(caminho_arquivo, nome_aba, coluna):
         print(f"Ocorreu um erro inesperado: {e}")
         return None
 
-caminho = r"Y:\DADOS\INADIMPLENCIA\BASE\Contas a Receber em aberto - GS.xlsx"
+caminho = r"\\10.1.0.4\dados\DADOS\INADIMPLENCIA\BASE\Contas a Receber em aberto - GS.xlsx"
 aba = "Consolidado"
 coluna = "U"
 
@@ -55,8 +55,11 @@ datas_invalidas = validador_horario(caminho, aba, coluna)
 
 if datas_invalidas is not None:
     if datas_invalidas:
-        print("Datas inválidas encontradas:")
-        for linha, data in datas_invalidas:
-            print(f"Linha {linha}: {data}")
+        print("Primeira linha com data atrasada encontrada:")
+        linha, data = datas_invalidas[0]
+        print(f"Linha {linha}: {data}")
+        print("ATUALIZE A COLUNA BASE!!!!!!")
+        exit()
     else:
         print("Todas as datas na coluna correspondem à data atual.")
+

@@ -11,9 +11,26 @@ from enviar_emails import enviar_email_com_df
 def processar_pastas(diretorio_base: str, remetente: str, senha: str):
     erros = []  # Lista para armazenar os erros
 
+    try:
+        caminho_geral = os.path.join(diretorio_base, "GERAL", "Contas a Receber em aberto - Geral.xlsx")
+        print(f"\nAtualizando planilha GERAL: {caminho_geral}")
+        atualizar_planilha_excel(caminho_geral)
+    except Exception as e:
+        msg = f"Erro ao atualizar a planilha da GERAL: {e}"
+        print(msg)
+        erros.append({
+            "Pasta": "GERAL",
+            "Erro": msg,
+            "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            
+        })
+
     pastas = [p for p in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, p))]
 
-    for nome_pasta in tqdm(pastas, desc="Processando pastas"):
+    for nome_pasta in tqdm(pastas, desc="\nProcessando pastas"):
+        if nome_pasta.upper() == "GERAL":
+            continue
+
         caminho_pasta = os.path.join(diretorio_base, nome_pasta)
 
         planilhas = [f for f in os.listdir(caminho_pasta) if f.lower().endswith(('.xlsx', '.xls'))]
@@ -36,9 +53,11 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
 
 
         try:
-            print(f"Atualizando: {caminho_excel}")
+            print(f"\nAtualizando: {caminho_excel}")
             atualizar_planilha_excel(caminho_excel)
-            
+                 
+
+
             print(f"Lendo: {caminho_excel}")
             df = ler_excel_em_dataframe(caminho_excel)
             um_dia = timedelta(days=1)
