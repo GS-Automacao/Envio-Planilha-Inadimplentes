@@ -6,6 +6,10 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.errors import HttpError
 
+#-> Função de gerar o relatorio na planilha do google.
+#-> necessario que a pasta configs esteja no mesmo diretorio do executavel.
+#-> as colunas do relatorio são fixas com>: a data da execução, nome do bot, df e tempo de execução.
+
 
 def salva_relatorio(row: List[List]) -> None:
         SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]

@@ -1,13 +1,13 @@
 import os
 import time
 import win32com.client
-
+from dotenv import load_dotenv
+load_dotenv()
 
 def atualizar_planilha_geral():
     excel = win32com.client.Dispatch("Excel.Application")
     excel.Visible = False
-    plan_geral = r"\\10.1.0.4\dados\DADOS\INADIMPLENCIA\GERAL\Contas a Receber em aberto - Geral.xlsx"
-
+    plan_geral = os.getenv('caminho_geral')
     try:
         plan_atualizada = excel.Workbooks.Open(os.path.abspath(plan_geral))
         plan_atualizada.RefreshAll()
@@ -18,9 +18,6 @@ def atualizar_planilha_geral():
         print(f"erro ao atualizar a planilha geral: {e}")
     finally:
         excel.Quit()
-
-
-
 
 def atualizar_planilha_excel(caminho_excel: str):
     """Atualiza uma planilha Excel via COM."""

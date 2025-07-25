@@ -1,7 +1,16 @@
+import os
 import openpyxl
 from datetime import datetime
+from dotenv import load_dotenv
+import pandas as pd
 
+#função validador_horario verifica o horario da primeira linha da coluna na planilha base.
+#caso esteja atrasado (dia anterior) apresenta um erro e pede para que a planilha base seja atualizada
+#caso contrario, segue executando o codigo.
+
+load_dotenv()
 def validador_horario(caminho_arquivo, nome_aba, coluna):
+    
     try: 
         workbook = openpyxl.load_workbook(caminho_arquivo, data_only=True)
         sheet = workbook[nome_aba]
@@ -47,7 +56,7 @@ def validador_horario(caminho_arquivo, nome_aba, coluna):
         print(f"Ocorreu um erro inesperado: {e}")
         return None
 
-caminho = r"\\10.1.0.4\dados\DADOS\INADIMPLENCIA\BASE\Contas a Receber em aberto - GS.xlsx"
+caminho = os.getenv('caminho_validador')
 aba = "Consolidado"
 coluna = "U"
 
@@ -55,11 +64,24 @@ datas_invalidas = validador_horario(caminho, aba, coluna)
 
 if datas_invalidas is not None:
     if datas_invalidas:
+        erros = []
         print("Primeira linha com data atrasada encontrada:")
         linha, data = datas_invalidas[0]
         print(f"Linha {linha}: {data}")
-        print("ATUALIZE A COLUNA BASE!!!!!!")
+        msg = "Erro: planilha BASE não está atualizada!!!!!!"
+        print(msg)
+        erros.append({
+            "Pasta": "BASE",
+            "Erro": msg,
+            "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        })
+        if erros:
+            df_erros = pd.DataFrame(erros)
+            log_path = os.path.join(os.getcwd(), "log_geral.xlsx")
+            df_erros.to_excel(log_path, index=False)
+            print(f"\nLog de erros da planilha geral salvo em: {log_path}")
+        else:
+            print("\n A pasta geral foi atualizada com sucesso!")
         exit()
-    else:
-        print("Todas as datas na coluna correspondem à data atual.")
+    
 

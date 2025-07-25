@@ -3,6 +3,10 @@ from email.message import EmailMessage
 import smtplib
 import pandas as pd
 
+#-> pega as informações para enviar o email no arquivo processar_pastas.py e envia o email.
+#-> servidor correspodente ao do remetente (IMPORTANTE)
+
+
 def enviar_email_com_df(para: str, assunto: str, corpo: str, df: pd.DataFrame, remetente: str, senha: str, nome_original: str):
     msg = EmailMessage()
     msg['From'] = remetente

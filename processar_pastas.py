@@ -5,12 +5,16 @@ import pandas as pd
 from atualizar_planilha import atualizar_planilha_excel
 from ler_planilha import ler_excel_em_dataframe
 from enviar_emails import enviar_email_com_df
+from dotenv import load_dotenv
 
+#Explicação da função:
+#-> Processar_pastas: chama a função para atualizar a pasta geral
+#  de forma prioritaria e depois atualiza e envia as outras pastas, incluive a geral.
+#-> E gera o log de erro geral.
 
-
+load_dotenv()
 def processar_pastas(diretorio_base: str, remetente: str, senha: str):
-    erros = []  # Lista para armazenar os erros
-
+    erros = []  # armazena erros
     try:
         caminho_geral = os.path.join(diretorio_base, "GERAL", "Contas a Receber em aberto - Geral.xlsx")
         print(f"\nAtualizando planilha GERAL: {caminho_geral}")
@@ -18,17 +22,11 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
     except Exception as e:
         msg = f"Erro ao atualizar a planilha da GERAL: {e}"
         print(msg)
-        erros.append({
-            "Pasta": "GERAL",
-            "Erro": msg,
-            "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        erros.append({"Pasta": "GERAL", "Erro": str(e), "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")})
             
-        })
-
-    pastas = [p for p in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, p))]
-
-            
-    for nome_pasta in tqdm(pastas, desc="Processando pastas"):    
+    pastas = [p for p in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, p)) and p.upper() != ""] #-> se quiser pular alguma pasta especifica, basta colocar entre as aspas.
+       
+    for nome_pasta in tqdm(pastas, desc="\nProcessando pastas"):    
         caminho_pasta = os.path.join(diretorio_base, nome_pasta)
 
         planilhas = [f for f in os.listdir(caminho_pasta) if f.lower().endswith(('.xlsx', '.xls'))]
@@ -41,11 +39,11 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
 
         if not destinatario:
             msg = f"Destinatário não encontrado para '{nome_pasta}'."
-            print(f" {msg} Pulando.")
+            print(f"\n {msg} Pulando.")
             erros.append({
                 "Pasta": nome_pasta,
                 "Erro": msg,
-                "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S") #-> add essas colunas ao log de erro.
             })
             continue
 
@@ -79,7 +77,7 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
             
         Qualquer dúvida, entrar em contato com (85)99825-2426 -  Helpdesk GS
             """
-
+            # informações do email, destinatario, titulo, corpo acima, a planilha correspodente, remetente, senha e nome original do arquivo.
             enviar_email_com_df(
                 para=destinatario,
                 assunto=f"Inadimplência - {nome_pasta} - {data_hoje}",
@@ -102,7 +100,7 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
                 
             })
 
-    # Salvar log de erros (se houver)
+    # Salvar log de erros (se houver) -> gera o log de erros.
     if erros:
         df_erros = pd.DataFrame(erros)
         log_path = os.path.join(os.getcwd(), "log_erros.xlsx")
