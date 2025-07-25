@@ -2,8 +2,8 @@ import os
 import time
 import win32com.client
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 def atualizar_planilha_geral():
     excel = win32com.client.Dispatch("Excel.Application")
     excel.Visible = False

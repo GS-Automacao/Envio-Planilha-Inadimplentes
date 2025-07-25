@@ -29,13 +29,7 @@ validador_horario(caminho_arquivo, nome_aba, coluna)
 REMETENTE = os.getenv("usuario")
 SENHA = os.getenv("senha")
 DIRETORIO_BASE = os.getenv('DIRETORIO_BASE')
-time_inicio = time.time()
-processar_pastas(DIRETORIO_BASE, REMETENTE, SENHA)
 
-time_fim = time.time()
-tempo_total = time_fim - time_inicio
-data = datetime.now().strftime("%d/%m/%Y")
-row = [[data, "Envio Emails Inadimplencia", "", tempo_total]]
-salva_relatorio(row)
-print("Cleyton agradece pela execução dele :)")
+processar_pastas(DIRETORIO_BASE, REMETENTE, SENHA)
+print("Cleyton agradece por ter sido usado ! :)")
 

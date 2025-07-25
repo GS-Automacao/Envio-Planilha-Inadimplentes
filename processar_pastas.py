@@ -1,11 +1,14 @@
 import os
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 from tqdm import tqdm
 import pandas as pd
 from atualizar_planilha import atualizar_planilha_excel
 from ler_planilha import ler_excel_em_dataframe
 from enviar_emails import enviar_email_com_df
 from dotenv import load_dotenv
+from relatorio import salva_relatorio
+import time
+
 
 #Explicação da função:
 #-> Processar_pastas: chama a função para atualizar a pasta geral
@@ -14,6 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 def processar_pastas(diretorio_base: str, remetente: str, senha: str):
+    time_inicio = time.time()
     erros = []  # armazena erros
     try:
         caminho_geral = os.path.join(diretorio_base, "GERAL", "Contas a Receber em aberto - Geral.xlsx")
@@ -24,12 +28,12 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
         print(msg)
         erros.append({"Pasta": "GERAL", "Erro": str(e), "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")})
             
-    pastas = [p for p in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, p)) and p.upper() != ""] #-> se quiser pular alguma pasta especifica, basta colocar entre as aspas.
+    pastas = [folder for folder in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper() != ""] #-> se quiser pular alguma pasta especifica, basta colocar entre as aspas.
        
     for nome_pasta in tqdm(pastas, desc="\nProcessando pastas"):    
         caminho_pasta = os.path.join(diretorio_base, nome_pasta)
 
-        planilhas = [f for f in os.listdir(caminho_pasta) if f.lower().endswith(('.xlsx', '.xls'))]
+        planilhas = [file for file in os.listdir(caminho_pasta) if file.lower().endswith(('.xlsx', '.xls'))]
         if not planilhas:
             print(f" Nenhuma planilha na pasta: {nome_pasta}")
             continue
@@ -108,3 +112,10 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
         print(f"\nLog de erros salvo em: {log_path}")
     else:
         print("\nTodas as pastas foram processadas sem erros.")
+
+
+    time_fim = time.time()
+    tempo_total = time_fim - time_inicio
+    data = datetime.now().strftime("%d/%m/%Y")
+    linha = [[data, "Envio Emails Inadimplencia", len(pastas), tempo_total]]
+    salva_relatorio(linha)
