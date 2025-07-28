@@ -77,7 +77,7 @@ if datas_invalidas is not None:
         })
         if erros:
             df_erros = pd.DataFrame(erros)
-            log_path = os.path.join(os.getcwd(), "log_geral.xlsx")
+            log_path = os.path.join ("log_geral.xlsx")
             df_erros.to_excel(log_path, index=False)
             print(f"\nLog de erros da planilha geral salvo em: {log_path}")
         else:

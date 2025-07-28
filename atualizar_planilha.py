@@ -7,11 +7,12 @@ load_dotenv()
 def atualizar_planilha_geral():
     excel = win32com.client.Dispatch("Excel.Application")
     excel.Visible = False
+    excel.DisplayAlerts = False
     plan_geral = os.getenv('caminho_geral')
     try:
         plan_atualizada = excel.Workbooks.Open(os.path.abspath(plan_geral))
         plan_atualizada.RefreshAll()
-        time.sleep(5)
+        time.sleep(5) 
         plan_atualizada.Save()
         plan_atualizada.Close()
     except Exception as e:
@@ -22,6 +23,7 @@ def atualizar_planilha_geral():
 def atualizar_planilha_excel(caminho_excel: str):
     """Atualiza uma planilha Excel via COM."""
     excel = win32com.client.Dispatch("Excel.Application")
+    excel.DisplayAlerts = False
     excel.Visible = False
     try:
         wb = excel.Workbooks.Open(os.path.abspath(caminho_excel))

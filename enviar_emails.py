@@ -2,9 +2,6 @@ import os
 from email.message import EmailMessage
 import smtplib
 import pandas as pd
-from datetime import time, datetime
-from relatorio import salva_relatorio
-import time
 
 #-> pega as informações para enviar o email no arquivo processar_pastas.py e envia o email.
 #-> servidor correspodente ao do remetente (IMPORTANTE)

@@ -28,9 +28,9 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
         print(msg)
         erros.append({"Pasta": "GERAL", "Erro": str(e), "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")})
             
-    pastas = [folder for folder in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper() != ""] #-> se quiser pular alguma pasta especifica, basta colocar entre as aspas.
+    pastas = [folder for folder in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper()] #-> se quiser pular alguma pasta especifica, basta colocar entre as aspas.
        
-    for nome_pasta in tqdm(pastas, desc="\nProcessando pastas"):    
+    for nome_pasta in tqdm(pastas, desc="Processando pastas"):    
         caminho_pasta = os.path.join(diretorio_base, nome_pasta)
 
         planilhas = [file for file in os.listdir(caminho_pasta) if file.lower().endswith(('.xlsx', '.xls'))]
@@ -84,7 +84,7 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
             # informações do email, destinatario, titulo, corpo acima, a planilha correspodente, remetente, senha e nome original do arquivo.
             enviar_email_com_df(
                 para=destinatario,
-                assunto=f"Inadimplência - {nome_pasta} - {data_hoje}",
+                assunto=f"(ERRATA) Inadimplência - {nome_pasta} - {data_hoje}",
                 corpo = corpo_email,
                 df=df,
                 remetente=remetente,
@@ -107,7 +107,7 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
     # Salvar log de erros (se houver) -> gera o log de erros.
     if erros:
         df_erros = pd.DataFrame(erros)
-        log_path = os.path.join(os.getcwd(), "log_erros.xlsx")
+        log_path = os.path.join( "log_erros.xlsx")
         df_erros.to_excel(log_path, index=False)
         print(f"\nLog de erros salvo em: {log_path}")
     else:
