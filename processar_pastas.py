@@ -8,7 +8,7 @@ from enviar_emails import enviar_email_com_df
 from dotenv import load_dotenv
 from relatorio import salva_relatorio
 import time
-
+import smtplib
 
 #Explicação da função:
 #-> Processar_pastas: chama a função para atualizar a pasta geral
@@ -16,9 +16,14 @@ import time
 #-> E gera o log de erro geral.
 
 load_dotenv()
+REMETENTE = os.getenv("usuario")
+SENHA = os.getenv("senha")
+destinatarios_env = dict(os.environ)
+
 def processar_pastas(diretorio_base: str, remetente: str, senha: str):
     time_inicio = time.time()
-    erros = []  # armazena erros
+    erros = []
+
     try:
         caminho_geral = os.path.join(diretorio_base, "GERAL", "Contas a Receber em aberto - Geral.xlsx")
         print(f"\nAtualizando planilha GERAL: {caminho_geral}")
@@ -27,95 +32,80 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
         msg = f"Erro ao atualizar a planilha da GERAL: {e}"
         print(msg)
         erros.append({"Pasta": "GERAL", "Erro": str(e), "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")})
-            
-    pastas = [folder for folder in os.listdir(diretorio_base) if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper()] #-> se quiser pular alguma pasta especifica, basta colocar entre as aspas.
-       
-    for nome_pasta in tqdm(pastas, desc="Processando pastas"):    
-        caminho_pasta = os.path.join(diretorio_base, nome_pasta)
 
-        planilhas = [file for file in os.listdir(caminho_pasta) if file.lower().endswith(('.xlsx', '.xls'))]
-        if not planilhas:
-            print(f" Nenhuma planilha na pasta: {nome_pasta}")
-            continue
+    pastas = [
+        folder for folder in os.listdir(diretorio_base)
+        if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper() != "GERAL"
+    ]
 
-        caminho_excel = os.path.join(caminho_pasta, planilhas[0])
-        destinatario = os.getenv(nome_pasta.strip())
+    smtp = smtplib.SMTP_SSL('email-ssl.com.br', 465)
+    smtp.login(remetente, senha)
 
-        if not destinatario:
-            msg = f"Destinatário não encontrado para '{nome_pasta}'."
-            print(f"\n {msg} Pulando.")
-            erros.append({
-                "Pasta": nome_pasta,
-                "Erro": msg,
-                "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S") #-> add essas colunas ao log de erro.
-            })
-            continue
+    um_dia = timedelta(days=1)
+    data_anterior = (datetime.now() - um_dia).strftime("%d/%m/%Y")
+    data_hoje = date.today().strftime("%d/%m/%Y")
+    corpo_email = f"""
+Bom dia,
 
+Segue em anexo os dados atualizados da inadimplência! 
 
-        try:
-            print(f"\nAtualizando: {caminho_excel}")
-            atualizar_planilha_excel(caminho_excel)
-                 
+São considerados contas a receber até o vencimento em {data_anterior}.
 
+Este relatório é gerado diariamente para acompanhamento dos valores em aberto por cliente e data de vencimento.
 
-            print(f"Lendo: {caminho_excel}")
-            df = ler_excel_em_dataframe(caminho_excel)
-            um_dia = timedelta(days=1)
-            data_atual = datetime.now()
-            data_anterior = data_atual - um_dia
-            data_anterior = data_anterior.strftime("%d/%m/%Y")
-            data_hoje = date.today().strftime("%d/%m/%Y")
-            
-            
-            corpo_email = f"""
-        Bom dia,
+Qualquer dúvida, entrar em contato com (85)99825-2426 - Helpdesk GS
+    """
 
+    try:
+        for nome_pasta in tqdm(pastas, desc="Processando pastas"):
+            caminho_pasta = os.path.join(diretorio_base, nome_pasta)
 
-            Segue em anexo os dados atualizados da inadimplência! 
-            
-            São considerados contas a receber até o vencimento em {data_anterior}.
+            planilhas = [f for f in os.listdir(caminho_pasta) if f.lower().endswith(('.xlsx', '.xls'))]
+            if not planilhas:
+                print(f" Nenhuma planilha na pasta: {nome_pasta}")
+                continue
 
-            Este relatório é gerado diariamente para acompanhamento dos valores em aberto por cliente e data de vencimento.
+            caminho_excel = os.path.join(caminho_pasta, planilhas[0])
+            destinatario = destinatarios_env.get(nome_pasta.strip())
 
-            
-            
-        Qualquer dúvida, entrar em contato com (85)99825-2426 -  Helpdesk GS
-            """
-            # informações do email, destinatario, titulo, corpo acima, a planilha correspodente, remetente, senha e nome original do arquivo.
-            enviar_email_com_df(
-                para=destinatario,
-                assunto=f"(ERRATA) Inadimplência - {nome_pasta} - {data_hoje}",
-                corpo = corpo_email,
-                df=df,
-                remetente=remetente,
-                senha=senha,
-                nome_original=os.path.basename(caminho_excel)
-            )
+            if not destinatario:
+                msg = f"Destinatário não encontrado para '{nome_pasta}'."
+                print(f"\n {msg} Pulando.")
+                erros.append({"Pasta": nome_pasta, "Erro": msg, "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")})
+                continue
 
-           
+            try:
+                print(f"\nAtualizando: {caminho_excel}")
+                atualizar_planilha_excel(caminho_excel)
 
-        except Exception as e:
-            msg = f"Erro ao processar {nome_pasta}: {e}"
-            print(msg)
-            erros.append({
-                "Pasta": nome_pasta,
-                "Erro": str(e),
-                "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                
-            })
+                print(f"Lendo: {caminho_excel}")
+                df = ler_excel_em_dataframe(caminho_excel)
 
-    # Salvar log de erros (se houver) -> gera o log de erros.
+                enviar_email_com_df(
+                    para=destinatario,
+                    assunto=f"Inadimplência - {nome_pasta} - {data_hoje}",
+                    corpo=corpo_email,
+                    df=df,
+                    remetente=remetente,
+                    senha=senha,
+                    nome_original=os.path.basename(caminho_excel),
+                    smtp=smtp
+                )
+            except Exception as e:
+                msg = f"Erro ao processar '{nome_pasta}': {e}"
+                print(msg)
+                erros.append({"Pasta": nome_pasta, "Erro": msg, "DataHora": datetime.now().strftime("%d/%m/%Y %H:%M:%S")})
+    finally:
+        smtp.quit()
+
     if erros:
         df_erros = pd.DataFrame(erros)
-        log_path = os.path.join( "log_erros.xlsx")
+        log_path = "log_erros.xlsx"
         df_erros.to_excel(log_path, index=False)
         print(f"\nLog de erros salvo em: {log_path}")
     else:
         print("\nTodas as pastas foram processadas sem erros.")
 
-
-    time_fim = time.time()
-    tempo_total = time_fim - time_inicio
+    tempo_total = time.time() - time_inicio
     data = datetime.now().strftime("%d/%m/%Y")
-    linha = [[data, "Envio Emails Inadimplencia", len(pastas), tempo_total]]
-    salva_relatorio(linha)
+    salva_relatorio([[data, "Envio Emails Inadimplencia", len(pastas), tempo_total]])
