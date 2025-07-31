@@ -16,3 +16,16 @@ Primeiro deve se verificar se o caminho, emails de destinatario, email e senha d
 E em segundo lugar ver se a planilha base foi atualizado com sucesso.
 
 OBS* lembrando que a planilha base atualiza as 9:55 e as 13h e o codigo so pode ser executado as 10:05 - logo apos a planilha base ser atualizada.
+
+
+
+████──░░░████░░░░░░░░░░    
+█──█──████──████░░░░░░░
+█──█──█──█──█──████████
+█──█──████──█──█──────█
+█──█──█──█────██──██──█
+█──████──█──█──█──────█
+█─────█──█──█──█──█████
+███████──████──█──────█
+──────████──███████████
+
