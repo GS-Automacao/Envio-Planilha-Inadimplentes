@@ -2,3 +2,4 @@
 .xlsx
 .spec
 .txt
+__pycache__

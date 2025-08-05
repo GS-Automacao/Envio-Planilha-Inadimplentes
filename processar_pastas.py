@@ -35,7 +35,8 @@ def processar_pastas(diretorio_base: str, remetente: str, senha: str):
 
     pastas = [
         folder for folder in os.listdir(diretorio_base)
-        if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper() != "GERAL"
+        if os.path.isdir(os.path.join(diretorio_base, folder))
+        # if os.path.isdir(os.path.join(diretorio_base, folder)) and folder.upper() != "GERAL"
     ]
 
     smtp = smtplib.SMTP_SSL('email-ssl.com.br', 465)

@@ -23,12 +23,13 @@ caminho_arquivo = os.getenv('caminho_base')
 nome_aba = "Consolidado"
 coluna = "U"
 
-validador_horario(caminho_arquivo, nome_aba, coluna)
+if validador_horario(caminho_arquivo, nome_aba, coluna):
+    print("Planilha atualizada hoje!")
+    REMETENTE = os.getenv("usuario")
+    SENHA = os.getenv("senha")
+    DIRETORIO_BASE = os.getenv('DIRETORIO_BASE')
 
-REMETENTE = os.getenv("usuario")
-SENHA = os.getenv("senha")
-DIRETORIO_BASE = os.getenv('DIRETORIO_BASE')
-
-processar_pastas(DIRETORIO_BASE, REMETENTE, SENHA)
-print("Codigo finalizado!")
-
+    processar_pastas(DIRETORIO_BASE, REMETENTE, SENHA)
+    print("Codigo finalizado!")
+else:
+    print("Planilha não atualizada.")
