@@ -2,11 +2,11 @@ import os
 from datetime import datetime, date, timedelta, time
 from tqdm import tqdm
 import pandas as pd
-from atualizar_planilha import atualizar_planilha_excel
-from ler_planilha import ler_excel_em_dataframe
-from enviar_emails import enviar_email_com_df
+from model.atualizar_planilha import atualizar_planilha_excel
+from model.ler_planilha import ler_excel_em_dataframe
+from controller.enviar_emails import enviar_email_com_df
 from dotenv import load_dotenv
-from relatorio import salva_relatorio
+from model.relatorio import salva_relatorio
 import time
 import smtplib
 
@@ -80,8 +80,8 @@ Qualquer dúvida, entrar em contato com (85)99825-2426 - Helpdesk GS
 
                 print(f"Lendo: {caminho_excel}")
                 df = ler_excel_em_dataframe(caminho_excel)
-
-                enviar_email_com_df(
+                enviados = []
+                enviados = enviar_email_com_df(
                     para=destinatario,
                     assunto=f"Inadimplência - {nome_pasta} - {data_hoje}",
                     corpo=corpo_email,
@@ -108,4 +108,4 @@ Qualquer dúvida, entrar em contato com (85)99825-2426 - Helpdesk GS
 
     tempo_total = time.time() - time_inicio
     data = datetime.now().strftime("%d/%m/%Y")
-    salva_relatorio([[data, "Envio Emails Inadimplencia", len(pastas), tempo_total]])
+    salva_relatorio([[data, "Envio Emails Inadimplencia", len(enviados), tempo_total]])
