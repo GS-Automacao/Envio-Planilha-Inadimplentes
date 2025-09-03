@@ -1,5 +1,7 @@
 DOCUMENTAÇÃO DO BOT INADIMPLENCIA.
 
+Pra que serve?
+
 I -  O codigo em si, serve para verificar se a pasta BASE foi atualizada, caso nao tenha sido atualizada, apresenta erro e pede para atualizar a mesma.
 II - Caso contrario, o codigo verifica quais pastas do diretorio estao presentes no arquivo .env e se estiverem, quais tem emails definidos.
 III - Caso tenham emails definidos, ele abre a pasta, abre a planilha, atualiza os dados dela, salva em um dataframe, envia pelo email definido, 
